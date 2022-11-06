@@ -70,64 +70,10 @@ dst=sortrows(dst,1);  % sort the results
 
 SHOW=15; % Show top 15 results
 dst=dst(1:SHOW,:);
-
-rowCol = [];
-for i=1:NIMG
-    rowNum = str2num(['uint8(',extractBefore(allfiles(i).name, "_"),')']);
-    colNum = str2num(['uint8(',extractBefore(extractAfter(allfiles(i).name,  rowNum + "_"), "_s"),')']);
-
-%     fprintf("Row num: %d\n", rowNum);
-%     fprintf("Col num: %d\n", colNum);
-
-    rowCol = [rowCol ; [rowNum colNum]];
-end
-rowCol = sortrows(rowCol, 1);
-
-row = 1;
-col = 0;
-numOfColsPerRow = [];
-for i=1:NIMG
-    if row == rowCol(i, 1)
-        if rowCol(i, 2) > col
-            fprintf("%d\n", col);
-            col = rowCol(i, 2);
-            numOfColsPerRow(row, 2) = col;
-        end
-    else
-        col = 0;
-    end
-
-    numOfColsPerRow(row, 1) = row;
-    row = rowCol(i, 1);
-end
-
-precisionRelevancy = [];
-recallRelevancy = [];
 for i=1:SHOW
-%     fprintf('Top 15 image: %d/%d - %s\n', dst(i, 2) ,length(allfiles), allfiles(dst(i, 2)).name);
-
-    rowNum = str2num(['uint8(',extractBefore(allfiles(dst(i, 2)).name, "_"),')']);
-    colNum = str2num(['uint8(',extractBefore(extractAfter(allfiles(dst(i, 2)).name,  rowNum + "_"), "_s"),')']);
-
-%     fprintf("Row num: %d\n", rowNum);
-%     fprintf("Col num: %d\n", colNum);
-
-    dst(i, 3) = str2num(['uint8(',extractBefore(allfiles(dst(i, 2)).name, "_"),')']);
+    fprintf('image %d/15: %d/%d - %s\n', i, dst(i, 2) ,length(allfiles), allfiles(dst(i, 2)).name);
 end
-
-for i=2:SHOW
-    precisionRelevancy(i, 1) = (dst(1, 3) == dst(i, 3));
-end
-
-precision = 0;
-
-for i=2:SHOW
-    precision = precision + precisionRelevancy(i, 1);
-end
-
-precision = precision/14;
-fprintf('Precision: %f', precision);
-
+PrecisionRecall(allfiles, NIMG, dst, SHOW);
 outdisplay=[];
 for i=1:size(dst,1)
    img=imread(ALLFILES{dst(i,2)});
