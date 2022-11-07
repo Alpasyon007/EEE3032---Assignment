@@ -52,7 +52,7 @@ end
 %% 2) Pick an image at random to be the query
 NIMG=size(ALLFEAT,1);           % number of images in collection
 queryimg=floor(rand()*NIMG);    % index of a random image
-
+queryimg = 323;
 
 %% 3) Compute the distance of image to the query
 dst=[];
