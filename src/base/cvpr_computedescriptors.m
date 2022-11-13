@@ -34,7 +34,7 @@ for filenum=1:length(allfiles)
     fout=[OUT_FOLDER,'/',OUT_SUBFOLDER,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
 %     F=extractRandom(img);
 %     F=ComputeRGBHistogram(img, 4);
-    F=SpatialGrid(img, 16);
+     F=SpatialGrid(img, 16);
     save(fout,'F');
     toc
 end

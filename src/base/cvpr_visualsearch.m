@@ -49,6 +49,23 @@ for filenum=1:length(allfiles)
     ctr=ctr+1;
 end
 
+ALLFEAT = ALLFEAT';
+
+eigenBuild=Eigen_Build(ALLFEAT);
+MahDist = Eigen_Mahalanobis(ALLFEAT, eigenBuild);
+eigenDeflated=Eigen_Deflate(eigenBuild, "keepn", 3);
+ALLFEATPCA=Eigen_Project(ALLFEAT, eigenDeflated)';
+size(ALLFEATPCA)
+
+figure('Name','PCA','NumberTitle','off')
+figure(1);
+plot3(ALLFEATPCA(:,1),ALLFEATPCA(:,2),ALLFEATPCA(:,3),'bx');
+xlabel('eigenvector1');
+ylabel('eigenvector2');
+zlabel('eigenvector3');
+
+ALLFEAT = ALLFEAT';
+
 %% 2) Pick an image at random to be the query
 NIMG=size(ALLFEAT,1);           % number of images in collection
 queryimg=floor(rand()*NIMG);    % index of a random image
@@ -59,7 +76,9 @@ dst=[];
 for i=1:NIMG
     candidate=ALLFEAT(i,:);
     query=ALLFEAT(queryimg,:);
-    thedst=cvpr_compare(query,candidate);
+%     thedst=cvpr_compare(query,candidate);
+    thedst=GetEculideanDistance(query, candidate);
+%     thedst=GetMahalanobisDistance(query,candidate, ALLFEATPCA);
     dst=[dst ; [thedst i]];
 end
 dst=sortrows(dst,1);  % sort the results
@@ -73,6 +92,7 @@ dst=dst(1:SHOW,:);
 for i=1:SHOW
     fprintf('image %d/15: %d/%d - %s\n', i, dst(i, 2) ,length(allfiles), allfiles(dst(i, 2)).name);
 end
+
 PrecisionRecall(allfiles, NIMG, dst, SHOW);
 outdisplay=[];
 for i=1:size(dst,1)
@@ -81,5 +101,8 @@ for i=1:size(dst,1)
    img=img(1:81,:,:); % crop image to uniform size vertically (some MSVC images are different heights)
    outdisplay=[outdisplay img];
 end
+
+figure('Name','Visual Search','NumberTitle','off')
+figure(2);
 imshow(outdisplay);
 axis off;
