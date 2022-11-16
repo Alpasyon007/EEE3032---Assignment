@@ -13,3 +13,5 @@ blue=reshape(blue,1,[]);
 average_blue=mean(blue); 
 
 C=[average_red average_green average_blue]; 
+
+return;

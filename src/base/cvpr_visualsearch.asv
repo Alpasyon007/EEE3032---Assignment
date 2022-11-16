@@ -22,12 +22,9 @@ clear all;
 
 DATASET_FOLDER = 'C:\Users\Alpas\OneDrive - University of Surrey\EEE3032 - Assignment\msrc_objcategimagedatabase_v2';
 DESCRIPTOR_FOLDER = 'C:\Users\Alpas\OneDrive - University of Surrey\EEE3032 - Assignment\descriptors';
+DESCRIPTOR_SUBFOLDER='globalRGBhisto';
 
-GLOBAL_AVERAGE_RGB_FOLDER='globalRGBaverage';
-GLOBAL_RGB_HISTOGRAM_FOLDER='globalRGBhisto';
-SPATIAL_GRID_FOLDER='spatialGrid';
-
-[allfiles, ALLFILES, ALLFEAT] = LoadDescriptors(DATASET_FOLDER, DESCRIPTOR_FOLDER, SPATIAL_GRID_FOLDER);
+[allfiles, ALLFILES, ALLFEAT] = LoadDescriptors(DATASET_FOLDER, DESCRIPTOR_FOLDER, DESCRIPTOR_SUBFOLDER);
 
 % Build eigen model
 figure('Name',"Spatial Grid PCA",'NumberTitle','off')
@@ -39,34 +36,28 @@ queryimg=floor(rand()*NIMG);    % index of a random image
 
 % queryimg = 323;
 % queryimg = 152;
-queryimg = 574;
+% queryimg = 574;
 
 % Get distance between query and candidate images
-MahalDist = Eigen_Mahalanobis(ALLFEAT', eigenDeflated);
 dst = GetDistance(queryimg, ALLFEAT, @GetMahalanobisDistance, eigenBuild.val);
 sortDstByImage = sortrows(dst, 2);
 
+figure('Name',"Harris Mask",'NumberTitle','off')
 img=imread(ALLFILES{sortDstByImage(queryimg,2)});
 
 % ComputeHarrisFeatures(img);
 
-% img=rgb2gray(img);
-% 
-% corners = detectHarrisFeatures(img);
-% figure('Name',"Harris Features",'NumberTitle','off')
-% imshow(img); hold on;
-% cornerPoint = corners.selectStrongest(1);
-% plot(cornerPoint);
-% 
-% cornerPoint.Location(1) = cornerPoint.Location(1) + 16;
-% cornerPoint.Location(2) = cornerPoint.Location(2) + 16;
-% 
-% plot(cornerPoint);
-% 
-% cornerPoint.Location(1) = cornerPoint.Location(1) - 32;
-% cornerPoint.Location(2) = cornerPoint.Location(2) - 32;
-% 
-% plot(cornerPoint);
+img=rgb2gray(img);
+
+corners = detectHarrisFeatures(img);
+figure('Name',"Harris Features",'NumberTitle','off')
+imshow(img); hold on;
+plot(corners.selectStrongest(200));
+
+mask = poly2mask(corners.Location(1,0, corners.selectStrongest(1).y, 16, 16);
+% extractedPixelValues = grayImage(mask);
+figure('Name',"Harris Mask",'NumberTitle','off')
+imgshow(mask);
 
 SHOW=15; % Show top 15 results
 dst=dst(1:SHOW,:);

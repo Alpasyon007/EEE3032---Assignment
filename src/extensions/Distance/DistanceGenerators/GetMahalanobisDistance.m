@@ -1,8 +1,8 @@
-function dst=GetMahalanobisDistance(F1, F2, e)
+function dst=GetMahalanobisDistance(F1, F2, v)
 
 x=F1-F2;
 x=x.^2;
-x=x./e(:,:);
+x=x./v';
 x=sum(x);
 dst=sqrt(x); 
 
