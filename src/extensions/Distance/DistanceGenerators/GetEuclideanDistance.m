@@ -1,4 +1,4 @@
-function dst=GetEculideanDistance(F1, F2)
+function dst=GetEuclideanDistance(F1, F2)
 
 x=F1-F2;
 xSprt=x.^2;
