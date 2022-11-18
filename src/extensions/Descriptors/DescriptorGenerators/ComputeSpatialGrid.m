@@ -1,7 +1,8 @@
-function G=ComputeSpatialGrid(img, C)
+function G=ComputeSpatialGrid(img, rowCol)
 
 % ImageCells = mat2tiles(img, [C,C]);
-G = [];
+E = [];
+A = [];
 
 % Read in image
 grayImage = img;
@@ -9,8 +10,8 @@ grayImage = img;
 % imshow(grayImage);
 % axis on;
 % impixelinfo
-numBandsVertically = 16;
-numBandsHorizontally = 16;
+numBandsVertically = rowCol(1);
+numBandsHorizontally = rowCol(2);
 topRows = round(linspace(1, rows+1, numBandsVertically + 1));
 leftColumns = round(linspace(1, columns+1, numBandsHorizontally + 1));
 
@@ -34,16 +35,19 @@ for row = 1 : length(topRows) - 1
 %  		subplot(numBandsVertically, numBandsHorizontally, plotCounter);
  		subImage = grayImage(row1 : row2, col1 : col2, :);
 %  		imshow(subImage);
+        E = [E ComputeEdgeOrientationHistogram(subImage)];
         C = ComputeGlobalColour(subImage);
 
         % C(1) = Average Red, C(2) = Average Green, C(3) = Average Blue
-        G = [G C(1) C(2) C(3)];
+        A = [A C(1) C(2) C(3)];
 %  		caption = sprintf('Rows %d-%d, Columns %d-%d', row1, row2, col1, col2);
 %  		title(caption);
 %  		drawnow;
 % 		plotCounter = plotCounter + 1;
 	end
 end
+
+G = [E A];
 % hFig2.WindowState = 'Maximized';
 
 

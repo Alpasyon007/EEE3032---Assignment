@@ -42,8 +42,7 @@ queryimg=floor(rand()*NIMG);    % index of a random image
 queryimg = 574;
 
 % Get distance between query and candidate images
-MahalDist = Eigen_Mahalanobis(ALLFEAT', eigenDeflated);
-dst = GetDistance(queryimg, ALLFEAT, @GetMahalanobisDistance, eigenBuild.val);
+dst = GetDistance(queryimg, ALLFEAT, @GetEuclideanDistance);
 sortDstByImage = sortrows(dst, 2);
 
 img=imread(ALLFILES{sortDstByImage(queryimg,2)});
@@ -76,7 +75,8 @@ dst=dst(1:SHOW,:);
 % end
 
 % Calculate Precision and Recall
-PrecisionRecall(allfiles, NIMG, dst, SHOW);
+[precision, recall] = PrecisionRecall(allfiles, NIMG, dst, SHOW);
+% fprintf('Precision: %f\nRecall: %f\n', precision, recall);
 
 outdisplay=[];
 for i=1:size(dst,1)

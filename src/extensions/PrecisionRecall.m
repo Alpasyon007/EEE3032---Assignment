@@ -13,55 +13,55 @@ function [precision, recall]=PrecisionRecall(allfiles, NIMG, dst, SHOW)
     DATASET_FOLDER = 'C:\Users\Alpas\OneDrive - University of Surrey\EEE3032 - Assignment\msrc_objcategimagedatabase_v2';
     DESCRIPTOR_FOLDER = 'C:\Users\Alpas\OneDrive - University of Surrey\EEE3032 - Assignment\descriptors';
   
-    Legend = {'void'        0;
-              'building'    0;
-              'grass'       0;
-              'tree'        0;
-              'cow'         0;
-              'horse'       0;
-              'sheep'       0;
-              'sky'         0;
-              'mountain'    0;
-              'aeroplane'   0;
-              'water'       0;
-              'face'        0;
-              'car'         0;
-              'bicycle'     0;
-              'flower'      0;
-              'sing'        0;
-              'bird'        0;
-              'book'        0;
-              'chair'       0;
-              'road'        0;
-              'cat'         0;
-              'dog'         0;
-              'body'        0;
-              'boat'        0;};
-
-      ALLFEAT={};
-      ALLFILES=cell(1,0);
-      ctr=1;
-      allGroundTruthFiles=dir(fullfile([DATASET_FOLDER,'/GroundTruth/*.bmp']));
-      for filenum=1:length(allGroundTruthFiles)
-          fname=allGroundTruthFiles(filenum).name;
-          imgfname_full=([DATASET_FOLDER,'/GroundTruth/',fname]);
-          featfile=[DESCRIPTOR_FOLDER,'/','GroundTruth','/',fname(1:end-4),'.mat'];%replace .bmp with .mat
-          load(featfile,'F');
-          ALLFILES{ctr}=imgfname_full;
-          ALLFEAT(filenum, 1)={F};
-          ctr=ctr+1;
-      end
-
-      for filenum=1:length(allGroundTruthFiles)
-          c = ALLFEAT{filenum};
-          for i=2:length(c)
-              for j=1:length(Legend)
-                  if strcmpi(c(1, i), Legend(j, 1))
-                     Legend{j, 2} = plus(Legend{j, 2}, 1);
-                  end
-              end
-          end
-      end
+%     Legend = {'void'        0;
+%               'building'    0;
+%               'grass'       0;
+%               'tree'        0;
+%               'cow'         0;
+%               'horse'       0;
+%               'sheep'       0;
+%               'sky'         0;
+%               'mountain'    0;
+%               'aeroplane'   0;
+%               'water'       0;
+%               'face'        0;
+%               'car'         0;
+%               'bicycle'     0;
+%               'flower'      0;
+%               'sing'        0;
+%               'bird'        0;
+%               'book'        0;
+%               'chair'       0;
+%               'road'        0;
+%               'cat'         0;
+%               'dog'         0;
+%               'body'        0;
+%               'boat'        0;};
+% 
+%       ALLFEAT={};
+%       ALLFILES=cell(1,0);
+%       ctr=1;
+%       allGroundTruthFiles=dir(fullfile([DATASET_FOLDER,'/GroundTruth/*.bmp']));
+%       for filenum=1:length(allGroundTruthFiles)
+%           fname=allGroundTruthFiles(filenum).name;
+%           imgfname_full=([DATASET_FOLDER,'/GroundTruth/',fname]);
+%           featfile=[DESCRIPTOR_FOLDER,'/','GroundTruth','/',fname(1:end-4),'.mat'];%replace .bmp with .mat
+%           load(featfile,'F');
+%           ALLFILES{ctr}=imgfname_full;
+%           ALLFEAT(filenum, 1)={F};
+%           ctr=ctr+1;
+%       end
+% 
+%       for filenum=1:length(allGroundTruthFiles)
+%           c = ALLFEAT{filenum};
+%           for i=2:length(c)
+%               for j=1:length(Legend)
+%                   if strcmpi(c(1, i), Legend(j, 1))
+%                      Legend{j, 2} = plus(Legend{j, 2}, 1);
+%                   end
+%               end
+%           end
+%       end
 
     for i=1:NIMG
         rowNum = str2num(['uint8(',extractBefore(allfiles(i).name, "_"),')']);
@@ -90,13 +90,21 @@ function [precision, recall]=PrecisionRecall(allfiles, NIMG, dst, SHOW)
         dst(i, 3) = str2num(['uint8(',extractBefore(allfiles(dst(i, 2)).name, "_"),')']);
     end
     
+    precisionRecallMat = [1 0];
+
     %
     for i=2:SHOW
         relevantResultNum = relevantResultNum + (dst(1, 3) == dst(i, 3));
+        precisionRecallMat = [precisionRecallMat; relevantResultNum/(i-1) relevantResultNum/(numOfColsPerRow(dst(1, 3), 2)) ];
     end
     
     precision = relevantResultNum/totalNumOfResults;
     recall = (precision*14)/(numOfColsPerRow(dst(1, 3), 2));
 
-%     fprintf('Precision: %f, %d/%d correct out of all returned\n', precision, relevantResultNum, totalNumOfResults);
-%     fprintf("Recall: %f, %d/%d correctly returned from the dataset\n", recall, relevantResultNum, numOfColsPerRow(dst(1, 3), 2));
+    plot(precisionRecallMat(:, 2), precisionRecallMat(:, 1))
+    axis([0 recall 0 1])
+    xlabel('Recall');
+    ylabel('Precision');
+
+    fprintf('Precision: %f, %d/%d correct out of all returned\n', precision, relevantResultNum, totalNumOfResults);
+    fprintf("Recall: %f, %d/%d correctly returned from the dataset\n", recall, relevantResultNum, numOfColsPerRow(dst(1, 3), 2));
