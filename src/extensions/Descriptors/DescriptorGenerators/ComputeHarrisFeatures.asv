@@ -1,14 +1,17 @@
-function D=Compute(img)
+function D=ComputeHarrisFeatures(img)
 
 img=rgb2gray(img);
 
 corners = detectHarrisFeatures(img);
 figure('Name',"Harris Features",'NumberTitle','off')
 imshow(img); hold on;
-plot(corners.selectStrongest(200));
+cornerPoints = corners.selectStrongest(1);
+pointLocations = cornerPoints.Location;
+pointLocations = round(pointLocations);
+subImage = img(pointLocations(1, 2) - 16 : pointLocations(1, 2) + 16, pointLocations(1, 1) - 16 : pointLocations(1, 1) + 16, :);
 
-mask = poly2mask(corners.selectStrongest.x, corners.selectStrongest.y, 16, 16);
-% extractedPixelValues = grayImage(mask);
-imgshow(mask);
+figure('Name',"Subimg",'NumberTitle','off')
+imshow(subImage);
+
 
 return;

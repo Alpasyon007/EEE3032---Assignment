@@ -1,4 +1,4 @@
-function [precision, recall]=PrecisionRecall(allfiles, NIMG, dst, SHOW)
+function [precisionRecallMat, averagePrecision, precision, recall]=PrecisionRecall(allfiles, NIMG, dst, SHOW)
     rowCol = [];
     numOfColsPerRow = [];
 
@@ -86,25 +86,38 @@ function [precision, recall]=PrecisionRecall(allfiles, NIMG, dst, SHOW)
     end
 
     % Row Numbers for Top 15 Results
-    for i=1:SHOW
+    for i=1:NIMG
         dst(i, 3) = str2num(['uint8(',extractBefore(allfiles(dst(i, 2)).name, "_"),')']);
     end
     
-    precisionRecallMat = [1 0];
+    precisionRecallMat = [];
+    numberOfRelevantResultsInDatabase = numOfColsPerRow(dst(1, 3), 2) - 1;
 
-    %
-    for i=2:SHOW
+    for i=2:NIMG
         relevantResultNum = relevantResultNum + (dst(1, 3) == dst(i, 3));
-        precisionRecallMat = [precisionRecallMat; relevantResultNum/(i-1) relevantResultNum/(numOfColsPerRow(dst(1, 3), 2)) ];
+        precisionRecallMat = [precisionRecallMat; relevantResultNum/(i-1) relevantResultNum/numberOfRelevantResultsInDatabase  (dst(1, 3) == dst(i, 3))];
+        if relevantResultNum/numberOfRelevantResultsInDatabase == 1
+            break;
+        end
     end
     
+    relevantResultNum = 0; % Reset Releveant Results Number
+
+    for i=2:SHOW
+        relevantResultNum = relevantResultNum + (dst(1, 3) == dst(i, 3));
+    end
+
+    precisionList = precisionRecallMat(:, 1);
+    recallList = precisionRecallMat(:, 3);
+    averagePrecision = sum(precisionList.*recallList)/numberOfRelevantResultsInDatabase;
+
     precision = relevantResultNum/totalNumOfResults;
-    recall = (precision*14)/(numOfColsPerRow(dst(1, 3), 2));
+    recall = relevantResultNum/numberOfRelevantResultsInDatabase;
 
-    plot(precisionRecallMat(:, 2), precisionRecallMat(:, 1))
-    axis([0 recall 0 1])
-    xlabel('Recall');
-    ylabel('Precision');
-
-    fprintf('Precision: %f, %d/%d correct out of all returned\n', precision, relevantResultNum, totalNumOfResults);
-    fprintf("Recall: %f, %d/%d correctly returned from the dataset\n", recall, relevantResultNum, numOfColsPerRow(dst(1, 3), 2));
+%     plot(precisionRecallMat(:, 2), precisionRecallMat(:, 1))
+%     axis([0 1 0 1])
+%     xlabel('Recall');
+%     ylabel('Precision');
+% 
+%     fprintf('Precision: %f, %d/%d correct out of all returned\n', precision, relevantResultNum, totalNumOfResults);
+%     fprintf("Recall: %f, %d/%d correctly returned from the dataset\n", recall, relevantResultNum, numberOfRelevantResultsInDatabase);

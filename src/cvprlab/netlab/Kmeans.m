@@ -82,7 +82,7 @@ for n = 1:niters
   old_centres = centres;
   
   % Calculate posteriors based on existing centres
-  d2 = dist2(data, centres);
+  d2 = DIST2(data, centres);
   % Assign each point to nearest centre
   [minvals, index] = min(d2', [], 1);
   post = id(index,:);

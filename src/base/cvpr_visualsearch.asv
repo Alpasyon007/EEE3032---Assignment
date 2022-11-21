@@ -22,13 +22,22 @@ clear all;
 
 DATASET_FOLDER = 'C:\Users\Alpas\OneDrive - University of Surrey\EEE3032 - Assignment\msrc_objcategimagedatabase_v2';
 DESCRIPTOR_FOLDER = 'C:\Users\Alpas\OneDrive - University of Surrey\EEE3032 - Assignment\descriptors';
-DESCRIPTOR_SUBFOLDER='globalRGBhisto';
 
-[allfiles, ALLFILES, ALLFEAT] = LoadDescriptors(DATASET_FOLDER, DESCRIPTOR_FOLDER, DESCRIPTOR_SUBFOLDER);
+GLOBAL_AVERAGE_RGB_FOLDER='globalRGBaverage';
+GLOBAL_RGB_HISTOGRAM_FOLDER='globalRGBhisto';
+SPATIAL_GRID_FOLDER='spatialGrid';
+EDGE_ORIENTATION='edgeOrientation';
+HARRIS_FEATURES='harrisFeatures';
+
+[allfiles, ALLFILES, ALLFEAT] = LoadDescriptors(DATASET_FOLDER, DESCRIPTOR_FOLDER, HARRIS_FEATURES);
 
 % Build eigen model
-figure('Name',"Spatial Grid PCA",'NumberTitle','off')
 [eigenBuild, eigenDeflated, ALLFEATPCA] = BuildEigenmodel(ALLFEAT);
+figure('Name',"Spatial Grid PCA",'NumberTitle','off')
+plot3(ALLFEATPCA(:,1),ALLFEATPCA(:,2),ALLFEATPCA(:,3),'bx');
+xlabel('eigenvector1');
+ylabel('eigenvector2');
+zlabel('eigenvector3');
 
 % Pick an image at random to be the query
 NIMG=size(ALLFEAT,1);           % number of images in collection
@@ -39,44 +48,45 @@ queryimg=floor(rand()*NIMG);    % index of a random image
 % queryimg = 574;
 
 % Get distance between query and candidate images
-dst = GetDistance(queryimg, ALLFEAT, @GetMahalanobisDistance, eigenBuild.val);
-sortDstByImage = sortrows(dst, 2);
+% dst = GetDistance(queryimg, ALLFEAT, @GetEuclideanDistance);
 
-figure('Name',"Harris Mask",'NumberTitle','off')
-img=imread(ALLFILES{sortDstByImage(queryimg,2)});
-
-% ComputeHarrisFeatures(img);
-
-img=rgb2gray(img);
-
-corners = detectHarrisFeatures(img);
-figure('Name',"Harris Features",'NumberTitle','off')
-imshow(img); hold on;
-plot(corners.selectStrongest(200));
-
-mask = poly2mask(corners.Location(1,0, corners.selectStrongest(1).y, 16, 16);
-% extractedPixelValues = grayImage(mask);
-figure('Name',"Harris Mask",'NumberTitle','off')
-imgshow(mask);
 
 SHOW=15; % Show top 15 results
-dst=dst(1:SHOW,:);
 
-% for i=1:SHOW
-%      fprintf('image %d/15: %d/%d - %s\n', i, dst(i, 2) ,length(allfiles), allfiles(dst(i, 2)).name);
-% end
+TotalPrecision = 0;
+TotalRecall = 0;
 
-% Calculate Precision and Recall
-PrecisionRecall(allfiles, NIMG, dst, SHOW);
+tic;
+for i=1:NIMG
+    % Get distance between query and candidate images
+    dst = GetDistance(i, ALLFEAT, @GetEuclideanDistance);
 
-outdisplay=[];
-for i=1:size(dst,1)
-   img=imread(ALLFILES{dst(i,2)});
-   img=img(1:2:end,1:2:end,:); % make image a quarter size
-   img=img(1:81,:,:); % crop image to uniform size vertically (some MSVC images are different heights)
-   outdisplay=[outdisplay img];
+    [precisionRecallMat, precision, recall] = PrecisionRecall(allfiles, NIMG, dst, SHOW);
+
+    TotalPrecision = plus(TotalPrecision, precision);
+    TotalRecall = plus(TotalRecall, recall);
 end
+toc;
+fprintf('Precision: %f\nRecall: %f\n', TotalPrecision/NIMG, TotalRecall/NIMG);
 
-figure('Name','Visual Search','NumberTitle','off')
-imshow(outdisplay);
-axis off;
+% % Calculate Precision and Recall
+% [precisionRecallMat, precision, recall] = PrecisionRecall(allfiles, NIMG, dst, SHOW);
+% fprintf('Precision: %f\nRecall: %f\n', precision, recall);
+% 
+% dst=dst(1:SHOW,:);
+% 
+% % for i=1:SHOW
+% %      fprintf('image %d/15: %d/%d - %s\n', i, dst(i, 2) ,length(allfiles), allfiles(dst(i, 2)).name);
+% % end
+% 
+% outdisplay=[];
+% for i=1:size(dst,1)
+%    img=imread(ALLFILES{dst(i,2)});
+%    img=img(1:2:end,1:2:end,:); % make image a quarter size
+%    img=img(1:81,:,:); % crop image to uniform size vertically (some MSVC images are different heights)
+%    outdisplay=[outdisplay img];
+% end
+% 
+% figure('Name','Visual Search','NumberTitle','off')
+% imshow(outdisplay);
+% axis off;
