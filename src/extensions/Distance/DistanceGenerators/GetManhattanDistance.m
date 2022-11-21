@@ -1,3 +1,3 @@
-function d=GetManhattanDistance(F1, F2)
-    d = sum(abs(bsxfun(@minus,F1,F2)),2);
+function dst=GetManhattanDistance(F1, F2)
+    dst = sum(abs(F1 - F2));
 return;

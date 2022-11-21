@@ -96,9 +96,9 @@ function [precisionRecallMat, averagePrecision, precision, recall]=PrecisionReca
     for i=2:NIMG
         relevantResultNum = relevantResultNum + (dst(1, 3) == dst(i, 3));
         precisionRecallMat = [precisionRecallMat; relevantResultNum/(i-1) relevantResultNum/numberOfRelevantResultsInDatabase  (dst(1, 3) == dst(i, 3))];
-        if relevantResultNum/numberOfRelevantResultsInDatabase == 1
-            break;
-        end
+%         if relevantResultNum/numberOfRelevantResultsInDatabase == 1
+%             break;
+%         end
     end
     
     relevantResultNum = 0; % Reset Releveant Results Number
